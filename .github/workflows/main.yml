@@ -1,5 +1,5 @@
 name: My First App
-on: pull_request
+on: push
 
 jobs:
   my-first-job:
