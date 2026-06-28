@@ -1,10 +1,46 @@
-name: My first workflow
+name: Deploy Frontend Applications
+
 on: [push, workflow_dispatch]
+
 jobs:
-  my-first-job:
+  deploy:
     runs-on: ubuntu-latest
+
+    env:
+      S3_Bucket_NAME: pagination-frontend
+      CLOUDFRONT_DISTRIBUTION_ID: E14S609AUZ9IUV
+      VITE_BACKEND_URL: https://pagination-backend-4bnz.onrender.com
+
     steps:
-      - name: Pull File 
-        uses: actions/checkout@v7
-      - name: List all file 
-        run: ls -la
+      - name: Clone frontend repository
+        run: git clone https://github.com/Fahadbhati182/pagination-frontend.git .
+
+      - name: SetUp Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "23"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build app
+        run: npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.1.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Upload to S3
+        run: aws s3 sync dist/ "s3://${S3_Bucket_NAME}/" --delete
+
+      - name: create Invalidations
+        run: |
+          aws cloudfront create-invalidation \
+          --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+          --paths "/index.html"
+
+      - name: Deployment complete
+        run: echo "Frontend Deployed successfully..."
