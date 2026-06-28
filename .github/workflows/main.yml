@@ -1,18 +1,10 @@
-name: My First App
-on: push
-
+name: My first workflow
+on: [push, workflow_dispatch]
 jobs:
   my-first-job:
     runs-on: ubuntu-latest
-
     steps:
-      - name: List Files
-        run: ls
-      - name: Create JS File
-        run: echo "Fahad Bhati" > text.js
-      - name: List Files
-        run: ls
-      - name: Create Node File
-        run: echo "console.log("Fahad Bhati")" > demo.mjs
-      - name: List Files
-        run: ls
+      - name: Pull File 
+        uses: actions/checkout@v7
+      - name: List all file 
+        uses: ls -la
